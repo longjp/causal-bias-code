@@ -1,0 +1,7 @@
+Code supporting 'Sample Selection Bias in Evaluation of Prediction Performance of Causal Models' by Long and Ha
+
+ms-bias/figs ## folder for saving plots
+sim/ ## simulations
+analysis/ ## pipeline for analyzing kemmeren data, submitting lsf jobs
+data/ ## kemmeren data
+

@@ -1,0 +1,3 @@
+rm *.RData
+rm *.out
+rm *.lsf
