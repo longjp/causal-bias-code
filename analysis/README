@@ -1,0 +1,37 @@
+Fits causal models on Kemmeren data set to predict the results of gene knockout experiments.
+
+
+= files
+## prepares kemmeren data for analysis
+0-data-setup.R 
+
+## runs models on 0-data-setup.RData
+1-fit.R 
+
+## creates *.lsf files and submit them to job scheduler
+## the output is then stored in 1-fit_seed.RData where
+## * is the name of the model and seed is the seed used for that run
+1-lsf.R
+
+## compiles results of model runs (e.g. averages ranks of coefficients)
+2-summarize.R
+
+
+
+#### USAGE
+
+### EXAMPLE: FAST, MOSTLY FOR TESTING
+bash clean ## gets rid of old results
+Rscript 0-data-setup.R args_fast.R ## sets up data
+Rscript 1-fit.R args_fast.R
+Rscript 2-summarize.R
+## run 3-*.R to generate plot output / compare performance
+
+### EXAMPLE: FULL RUN ON HPC with JOB SCHEDULER
+Rscript 0-data-setup.R args_hpc.R ## sets up data
+Rscript 1-lsf.R args_hpc.R ## creates lsf scripts and submits jobs (long time)
+Rscript 2-summarize.R
+## run 3-*.R to generate plot output / compare performance
+
+### EXAMPLE: TEST LSF FILE GENERATION
+Rscript 1-lsf.R args_fast.R ## creates lsf scripts does not submit jobs
