@@ -1,4 +1,4 @@
-Code supporting 'Sample Selection Bias in Evaluation of Prediction Performance of Causal Models' by Long and Ha
+Code supporting 'Sample Selection Bias in Evaluation of Prediction Performance of Causal Models' by Long and Ha 2021+
 
 ms-bias/figs ## folder for saving plots
 sim/ ## simulations
