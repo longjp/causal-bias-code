@@ -1,6 +1,5 @@
 library(parallel)
 library(glmnet)
-library(AER)
 ## causalDantzig was removed from current version of InvariantCausalPrediction package. 
 ## here we install (if uncomment two lines) / load old version 
 #library(remotes)
@@ -70,11 +69,6 @@ predictEST <- function(obs,ko_train,ko_test_names,rseed,mc.cores=4){
                showAcceptedSets=FALSE,
                showCompletion=FALSE)
     icp_est <- fit$maximinCoefficients
-    ## instrumental variables
-    Xsubi <- cbind(1,Xsub)
-    iv_est <- ivreg.fit(Xsubi,Y,E)$coefficients[-1]
-    ## regularized IV2
-    iv2_est <- TSLSreg(Xsub,Y,E)
     Xsub <- NULL
     X <- NULL
     Y <- NULL
@@ -83,9 +77,7 @@ predictEST <- function(obs,ko_train,ko_test_names,rseed,mc.cores=4){
     tout <- list(l1_est=l1_est,
                  l1r_est=l1r_est,
                  cd_est=cd_est,
-                 icp_est=icp_est,
-                 iv_est=iv_est,
-                 iv2_est=iv2_est)
+                 icp_est=icp_est)
     print(paste0("================ yname:",yname))
     print("tout is:")
     print(tout)
