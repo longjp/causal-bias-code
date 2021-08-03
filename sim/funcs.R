@@ -1,6 +1,4 @@
-## functions for high dimensional simulations
-## see high-dim.Rmd for description
-library(AER)
+## functions for generating simulation data
 library(InvariantCausalPrediction)
 library(magic)
 
@@ -158,41 +156,7 @@ RunSim <- function(jj,params,rseeds){
   }
   IC <- sum(beta[order(abs(IC),rand_coef,
                        decreasing=TRUE)[1:Ntrue]]!=0)
-  ## instrumental variables
-  fitiv <- ivreg.fit(Xsub,Y,E)
-  iv_est <- rep(0,ncol(X))
-  iv_est[ix] <- coef(fitiv)
-  IV <- sum(beta[order(abs(iv_est),rand_coef,
-                       decreasing=TRUE)[1:Ntrue]]!=0)
-  ## regularized IV2
-  iv_reg2 <- TSLSreg(Xsub,Y,E)
-  iv_est2 <- rep(0,ncol(X))
-  iv_est2[ix] <- iv_reg2
-  IV2 <- sum(beta[order(abs(iv_est2),rand_coef,
-                        decreasing=TRUE)[1:Ntrue]]!=0)
   dat <- NULL
   gc()
-  return(list(c(L1=L1,L1R=L1R,CD=CD,IV=IV,IV2=IV2,ICP=IC),nused))
-}
-
-## experimental two stage least squares regularized estimator
-TSLSreg <- function(X,Y,E){
-  ExpInd <- rowSums(E)
-  Xobs <- X[ExpInd==0,,drop=FALSE]
-  alpha0 <- colMeans(Xobs)
-  sd0 <- apply(Xobs,2,sd)
-  X <- t(t(X) - alpha0)
-  lambda <- 4*sd0
-  ## OLS fit    
-  Dhat <- t(E)%*%X
-  nk <- pmax(colSums(E),1)
-  Dhat <- Dhat/nk
-  ## Lasso shrinkage
-  Dsign <- 2*(Dhat>0)-1
-  sub <- (matrix(1/nk,ncol=1)%*%matrix(lambda,nrow=1))/2
-  Dhat <- Dsign*pmax(abs(Dhat) - sub,0)
-  Xhat <- E%*%Dhat
-  ## unregularized second stage
-  coefs <- lm(Y~Xhat)$coefficient[-1]
-  return(coefs)
+  return(list(c(L1=L1,L1R=L1R,CD=CD,ICP=IC),nused))
 }

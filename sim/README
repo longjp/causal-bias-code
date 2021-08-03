@@ -1,18 +1,13 @@
-- runs high dimensional simulations
+Runs Kemmeren simulations
 
-- high-dim.Rmd describes parameters used in simulations and
-runs a fast version of the pipeline
-
-
-#### to run quick example
-Rscript 0-params.R ## creates parameters, outputs 0-params.RData
-high-dim.Rmd ## uses 0-params.RData and creates file describing simulations
-
-#### to run pipeline
 ## generate parameters used in simulation
 Rscript 0-params.R ## creates parameters, outputs 0-params.RData
-## run on high performance computer
-Rscript 1-lsf.R args_hpc.R ## runs pipeline on high performance computer
-## create plots and table output
+
+
+## FAST EXAMPLES
+demo.Rmd
+
+## FULL PIPELINE
+Rscript 1-lsf.R args_hpc.R ## use high performance computer system
 Rscript 2-make-plots.R
 Rscript 2-make-table.R
