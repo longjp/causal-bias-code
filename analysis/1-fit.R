@@ -1,10 +1,12 @@
+## runs pipeline 1x
+## see README for usage
 load("0-data-setup.RData")
 source("predictEST.R")
 source("funcs.R")
 
 ## load arguments
 args = commandArgs(trailingOnly=TRUE)
-# use laptop (fast) or hpc (slow) arguments
+# use args_fast.R (fast, mostly for testing) or args_hpc.R (slow, runs full pipeline)
 if(length(args)==0){
   stop("Must have exactly at least one command line argument.")
 } else{

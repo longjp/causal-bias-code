@@ -1,3 +1,4 @@
+## outputs ROC curves and tables of predictions used in manuscript
 rm(list=ls())
 library(ggplot2)
 library(Matrix)

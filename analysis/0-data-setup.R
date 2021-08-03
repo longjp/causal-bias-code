@@ -66,7 +66,7 @@ for(ii in 1:nrow(ko_sie_pnas)){
 
 
 
-## run with 300 genes, about 20x less data
+## run with 300 genes, about 20x less data. useful for testing
 if(FAST){
   ix_col <- sample(colnames(obs),300)
   obs <- obs[,colnames(obs) %in% ix_col]
@@ -76,7 +76,7 @@ if(FAST){
                              colnames(ko_sie_pnas) %in% ix_col]
 }
 
-## choose fold
+## create folds for cross validation
 ix <- sample(1:3,nrow(ko),replace=TRUE)
 
 save(obs,ko,ko_sie,ko_sie_pnas,ix,file="0-data-setup.RData")
