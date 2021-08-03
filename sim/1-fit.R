@@ -1,9 +1,9 @@
+## do not run directly, run 1-lsf.R instead. see README
 load("0-params.RData")
 source("funcs.R")
 
 ## load arguments
 args = commandArgs(trailingOnly=TRUE)
-# use laptop (fast) or hpc (slow) arguments
 if(length(args)!=3){
   stop("Must have exactly three command line argument.")
 } else{
