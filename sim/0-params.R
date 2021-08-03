@@ -1,10 +1,6 @@
 ## stores / generates parameters for simulations
 source("funcs.R")
 
-####
-#### parameters for quick demo
-####
-
 ## check structure of parameters
 CheckParams <- function(params){
   params_names <- c("pp","p0","nobs","nko","np",
@@ -63,30 +59,34 @@ UpdateParams <- function(params,update=NULL){
 }
 
 
-## make params1
+
+####
+#### parameters for quick demo
+####
 params1 <- list(pp=10, ## size of ancestor / descendent sets
-                p0=3, ## size of parents / children
+                p0=1, ## size of parents / children
                 nobs=2000, ## observations per condition
-                nko=10, ## number of ko per gene
-                np=4,
-                ko_strength=-40,
+                nko=1, ## number of ko per gene knocked out (1 for kemmeren)
+                np=8, ## number of genes knocked out
+                ko_strength=-40, ## knockout shift strength
                 rho1=0, # covariance for ancestors / descendants
                 rho0=0, # covariance direct relatives
-                st1=1,
-                st2=100,
-                ntop=40)
-
+                st1=1, ## st1/st2 control relative correlation of y with parents/children
+                st2=1,
+                ntop=8) ## expected number of connections for node 1 (higher=more dense network)
 ## make parameter values
 params1 <- UpdateParams(params1)
-params2 <- UpdateParams(params1,list(nobs=10))
-params3 <- UpdateParams(params1,list(pp=200,p0=1,
-                                     nobs=500,nko=1,np=100)) ## higher dimensional
+params2 <- UpdateParams(params1,list(st1=1,st2=10))
+params3 <- UpdateParams(params1,list(pp=100,p0=1,
+                                     nobs=500,nko=1,np=98)) ## higher dimensional
 params_quick <- list(params1=params1,
                      params2=params2,
                      params3=params3)
 
 
-## create set of simulation params
+####
+#### full simulation parameters
+####
 pp <- 6400
 ntop <- c(20,40,80,160,320)
 st <- c("strong","weak")
