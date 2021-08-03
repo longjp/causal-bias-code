@@ -1,0 +1,182 @@
+---
+title: "Knockout Simulation Demonstration"
+author: "James Long"
+always_allow_html: yes
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: united
+    toc: yes
+    toc_collapsed: yes
+    toc_float: yes
+---
+
+```{r alternative-preambles,echo=FALSE,include=FALSE,eval=FALSE}
+## add date
+date: "05/20/2020"
+
+## if using word replace output with
+output:
+  word_document:
+    toc: yes
+
+## if using pdf replace output with
+output:
+  pdf_document:
+    toc: yes
+header-includes:
+  - \usepackage{xcolor}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+## colorizes text when using html or pdf output
+## just spits out text x for word
+colorize <- function(x, color) {
+  if(color=="todo"){
+    color <- "red"
+    x <- paste0("TODO: ",x)
+  }
+  if (knitr::is_latex_output()) {
+    sprintf("\\textcolor{%s}{%s}", color, x)
+  } else if (knitr::is_html_output()) {
+    sprintf("<span style='color: %s;'>%s</span>", color, 
+      x)
+  } else x
+}
+
+todo <- function(x){
+  paste0("**",colorize(x,"todo"),"**")
+}
+
+library(ggplot2)
+library(parallel)
+set.seed(1)
+```
+
+## Overview
+
+This demo shows how to generate simulation data and fit models. See Long and Ha 2021+ for description of the simulation parameters.
+
+## Load Functions and Simulation Parameters
+
+
+```{r functions,message=FALSE,warning=FALSE}
+source("funcs.R")
+## before loading this file must run script:
+## Rscript 0-params.R
+load("0-params.RData")
+```
+
+
+## Simulate and Fit
+
+Generate and plot data:
+
+```{r sim-eda}
+params <- params_quick[[1]]
+pp <- params$pp
+p0 <- params$p0
+dat <- GenerateData(params$pp,
+                    params$p0,
+                    params$nobs,
+                    params$nko,
+                    params$ko_strength,
+                    params$np,
+                    params$S2,
+                    params$st1,
+                    params$st2,
+                    params$ntop)
+X <- dat$X
+A <- dat$Abeta$A
+beta <- dat$Abeta$beta
+E <- dat$ER$E
+R <- dat$ER$R
+ix <- pp/2+1
+colnames(X) <- c(paste0("X",1:(pp/2)),
+                 "Y",
+                 paste0("X",
+                      (pp/2+1):(pp)))
+Y <- X[,ix]
+X <- X[,-ix]
+plot(1:ncol(X),apply(X,2,sd))
+ExpInd <- 1*(rowSums(abs(E))!=0)
+
+
+Xplot <- cbind(X[,(pp/2-p0+1):(pp/2)],Y,X[,(pp/2+1):(pp/2+p0)])
+pairs(Xplot,col=ExpInd+1)
+pairs(Xplot[ExpInd==0,])
+```
+
+Fit estimators on simulated data:
+
+```{r estimators}
+fitgm <- glmnet(X,Y)
+plot(fitgm,label=TRUE)
+fitgm <- cv.glmnet(X,Y)
+plot(fitgm)
+coefs <- coef(fitgm)
+
+l1_est <- coefs[-1]
+plot(beta,l1_est,main="L1")
+abline(h=0)
+
+## lasso selection
+ix <- coefs[-1]!=0
+Xsub <- X[,ix]
+ExpInd <- 1*(rowSums(abs(E))!=0)
+
+
+## fit causal dantzig
+fit <- causalDantzig(Xsub,Y,ExpInd)
+cd_est <- rep(0,ncol(X))
+cd_est[ix] <- coef(fit)[,1]
+plot(beta,cd_est,main="CD")
+abline(h=0)
+
+## fit ICP
+fit <- ICP(Xsub,Y,ExpInd,
+           maxNoVariables=10,
+           maxNoVariablesSimult=10,
+           stopIfEmpty=TRUE,
+           showAcceptedSets=FALSE,
+           showCompletion=FALSE)
+ICPest <- fit$maximinCoefficients
+IC <- rep(0,ncol(X))
+IC[ix] <- ICPest
+plot(beta,IC,main="ICP")
+abline(h=0)
+```
+
+
+
+## Performance Comparison
+
+Compare:
+
+* L1: Lasso regression
+* L1R: Randomly permute coefficients selected by L1
+* CD: Causal Dantzig on variables chosen by L1 regression
+* ICP: Invariant Causal Prediction
+
+For each simulation run, the number of true predictions among the top $p_0$ is recorded.
+
+```{r run-sims}
+N <- 100
+rseeds <- sample(1:10^8,N)
+for(ii in 1:length(params_quick)){
+  print(paste0("====== Parameters ",ii," ======="))
+  res <- mclapply(1:N,FUN=RunSim,
+                  params=params_quick[[ii]],
+                  rseeds=rseeds,
+                  mc.cores=1)
+  nused <- vapply(res,function(x){x[[2]]},c(0))
+  res <- lapply(res,function(x){x[[1]]})
+  cnames <- names(res[[1]])
+  res <- matrix(unlist(res),ncol=length(res[[1]]),byrow=TRUE)
+  colnames(res) <- cnames
+  print(summary(res))
+  print(summary(nused))
+}
+```
